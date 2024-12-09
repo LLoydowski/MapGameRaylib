@@ -36,5 +36,7 @@ bool isInTextureBounds(Vector2 worldPos, Vector2 texturePosition, Image &texture
         worldPos.y >= texturePosition.y &&
         worldPos.y <= texturePosition.y + texture.height);
 
+    UnloadTexture(texture);
+
     return inBounds;
 }

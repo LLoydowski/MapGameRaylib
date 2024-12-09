@@ -16,8 +16,8 @@ const int screenHeight = 450;
 json colorCodes;
 json stateData;
 
-void handleInputs(Camera2D& camera, Image& map){
-    if(IsMouseButtonDown(MOUSE_BUTTON_LEFT)){
+void getClickedState(Camera2D& camera, Image& map){
+    if(IsMouseButtonPressed(MOUSE_BUTTON_LEFT)){
         Vector2 mousePos = GetMousePosition(); //? Gets mouse position
         Vector2 worldPos = GetScreenToWorld2D(mousePos, camera); //? Converts screen position to world position
 
@@ -30,10 +30,25 @@ void handleInputs(Camera2D& camera, Image& map){
         Color color = GetImageColor(map, worldPos.x - textureSize.x , worldPos.y - textureSize.y); //? Gets color of the pressed pixel
         std::string colorStr = ColorToHexString(color);
 
+        std::cout << colorStr << std::endl; 
+        if(colorStr == "000000"){
+            return;
+        }
+
         const char* state = std::string(colorCodes[colorStr]).c_str();
         
         std::cout << stateData[state]["country"] << std::endl;
+        
     }   
+}
+
+void HandleUIEvents(){
+    if(IsMouseButtonPressed(MOUSE_BUTTON_LEFT)){
+        Vector2 mousePos = GetMousePosition();
+        
+        Rectangle cursorHitBox = {mousePos.x, mousePos.y, 1, 1};
+        
+    }
 }
 
 int main()
@@ -116,7 +131,7 @@ int main()
             }
         }
 
-        handleInputs(camera, map);
+        getClickedState(camera, map);
 
         BeginDrawing();
             ClearBackground(RAYWHITE);
@@ -131,7 +146,13 @@ int main()
 
             DrawTexture(mapTexture, screenWidth / 4, screenHeight / 4, WHITE);
             DrawRectangle(0, 0, 400, 400, GetColor(0xFF0055));
+
+
             EndMode2D();
+
+            //? UI
+
+            DrawRectangle(0, 0, 100, 100, BLUE);
 
 
         EndDrawing();
