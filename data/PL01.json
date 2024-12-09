@@ -1,0 +1,12 @@
+{
+    "ZPMR": {
+        "country": true,
+        "people": 2000,
+        "economy": 3260
+    },
+    "POMR": {
+        "country": false,
+        "people": 2000,
+        "economy": 3260
+    }
+}

@@ -10,12 +10,34 @@
 
 using json = nlohmann::json;
 
+
+const int screenWidth = 800;
+const int screenHeight = 450;
+json colorCodes;
+json stateData;
+
+void handleInputs(Camera2D& camera, Image& map){
+    if(IsMouseButtonDown(MOUSE_BUTTON_LEFT)){
+        Vector2 mousePos = GetMousePosition(); //? Gets mouse position
+        Vector2 worldPos = GetScreenToWorld2D(mousePos, camera); //? Converts screen position to world position
+
+        Vector2 textureSize = {screenWidth / 4, screenHeight / 4};
+
+        if(!isInTextureBounds(worldPos, textureSize, map)){
+            return;
+        }
+
+        Color color = GetImageColor(map, worldPos.x - textureSize.x , worldPos.y - textureSize.y); //? Gets color of the pressed pixel
+        std::string colorStr = ColorToHexString(color);
+
+        const char* state = std::string(colorCodes[colorStr]).c_str();
+        
+        std::cout << stateData[state]["country"] << std::endl;
+    }   
+}
+
 int main()
 {
-
-    const int screenWidth = 800;
-    const int screenHeight = 450;
-
     InitWindow(screenWidth, screenHeight, "Super Giga Map Game");
 
     SetTargetFPS(60);
@@ -28,9 +50,11 @@ int main()
 
     int zoomMode = 0;
 
-    std::ifstream f("gfx/maps/PL01.json");
-    json colorCodes = json::parse(f);
+    std::ifstream colorCodesStream("gfx/maps/PL01.json");
+    colorCodes = json::parse(colorCodesStream);
 
+    std::ifstream stateDataStream("data/PL01.json");
+    stateData = json::parse(stateDataStream);
 
     while (!WindowShouldClose()) 
     {
@@ -91,17 +115,8 @@ int main()
                 camera.zoom = Clamp(camera.zoom*scaleFactor, 0.125f, 64.0f);
             }
         }
-        if(IsMouseButtonDown(MOUSE_BUTTON_LEFT)){
-           
-            Vector2 mousePos = GetMousePosition(); //? Gets mouse position
-            Vector2 worldPos = GetScreenToWorld2D(mousePos, camera); //? Converts screen position to world position
 
-            Color color = GetImageColor(map, worldPos.x - screenWidth / 4 , worldPos.y - screenHeight / 4); //? Gets color of the pressed pixel
-
-            std::string colorStr = ColorToHexString(color);
-
-            std::cout << colorCodes[colorStr]<< std::endl;
-        }   
+        handleInputs(camera, map);
 
         BeginDrawing();
             ClearBackground(RAYWHITE);
