@@ -40,3 +40,10 @@ bool isInTextureBounds(Vector2 worldPos, Vector2 texturePosition, Image &texture
 
     return inBounds;
 }
+
+bool areColorsEqual(Color color1, Color color2) {
+    return (color1.r == color2.r &&
+            color1.g == color2.g &&
+            color1.b == color2.b &&
+            color1.a == color2.a);
+}

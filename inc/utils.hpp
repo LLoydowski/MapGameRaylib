@@ -7,3 +7,4 @@ void printColor(Color color);
 std::string ColorToHexString(Color color);
 bool isInTextureBounds(Vector2 worldPos, Vector2 texturePosition, Texture2D &texture);
 bool isInTextureBounds(Vector2 worldPos, Vector2 texturePosition, Image &textureImage);
+bool areColorsEqual(Color color1, Color color2);

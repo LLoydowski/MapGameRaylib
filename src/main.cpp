@@ -5,8 +5,10 @@
 #include <iostream>
 #include <fstream>
 #include <string>
+#include <vector>
 
 #include "utils.hpp"
+#include "UIElement.hpp"
 
 using json = nlohmann::json;
 
@@ -42,13 +44,47 @@ void getClickedState(Camera2D& camera, Image& map){
     }   
 }
 
-void HandleUIEvents(){
+void HandleUIEvents(std::vector<UIElement> &UIElements){
+    Vector2 mousePos = GetMousePosition();
+    Rectangle cursorHitBox = {mousePos.x, mousePos.y, 1, 1};
+
     if(IsMouseButtonPressed(MOUSE_BUTTON_LEFT)){
-        Vector2 mousePos = GetMousePosition();
         
-        Rectangle cursorHitBox = {mousePos.x, mousePos.y, 1, 1};
         
+        for(UIElement &element : UIElements){
+            Rectangle UIHitbox = {element.position.x, element.position.y, element.size.x, element.size.y};
+            int ID = element.getID();
+
+            if(CheckCollisionRecs(cursorHitBox, UIHitbox)){
+                if(ID == 1){
+                    element.color = GREEN;
+                }
+                break;
+            }
+        }
+
     }
+
+    for(UIElement &element : UIElements){
+            Rectangle UIHitbox = {element.position.x, element.position.y, element.size.x, element.size.y};
+            int ID = element.getID();
+
+            if(CheckCollisionRecs(cursorHitBox, UIHitbox)){
+                if(ID == 1 && !areColorsEqual(element.color, GREEN)){
+                    element.color = BLUE;
+                }
+                break;
+            }else{
+                if(ID == 1 && !areColorsEqual(element.color, GREEN)){
+                    element.color = BLACK;
+                }
+            }
+    }
+}
+
+void generateUI(std::vector<UIElement> &elements){
+    elements.push_back(UIElement({screenWidth - 200, screenHeight - 100}, {200, 100}, BLACK, 1));
+    elements.push_back(UIElement({0, 0}, {100, 50}, RED, 2));
 }
 
 int main()
@@ -70,6 +106,12 @@ int main()
 
     std::ifstream stateDataStream("data/PL01.json");
     stateData = json::parse(stateDataStream);
+
+    std::vector<UIElement> UIElements;
+
+    generateUI(UIElements);
+
+    
 
     while (!WindowShouldClose()) 
     {
@@ -132,6 +174,7 @@ int main()
         }
 
         getClickedState(camera, map);
+        HandleUIEvents(UIElements);
 
         BeginDrawing();
             ClearBackground(RAYWHITE);
@@ -152,7 +195,10 @@ int main()
 
             //? UI
 
-            DrawRectangle(0, 0, 100, 100, BLUE);
+            for(UIElement element : UIElements){
+                printColor(element.color);
+                DrawRectangle(element.position.x, element.position.y, element.size.x, element.size.y, element.color);
+            }
 
 
         EndDrawing();
