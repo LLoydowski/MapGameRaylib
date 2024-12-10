@@ -4,6 +4,8 @@
 #include <string>
 #include <iomanip>
 
+#include "utils.hpp"
+
 void printColor(Color color){
     std::cout << "R: " << int(color.r) << " G: " << int(color.g) << " B: " << int(color.b) << " A: " << int(color.a) << std::endl;
 }
@@ -46,4 +48,10 @@ bool areColorsEqual(Color color1, Color color2) {
             color1.g == color2.g &&
             color1.b == color2.b &&
             color1.a == color2.a);
+}
+
+void StateData::Clear(){
+    population = 0;
+    economy = 0;
+    country = "";
 }

@@ -15,8 +15,11 @@ using json = nlohmann::json;
 
 const int screenWidth = 800;
 const int screenHeight = 450;
+
 json colorCodes;
-json stateData;
+json statesData;
+
+StateData focusedState;
 
 void getClickedState(Camera2D& camera, Image& map){
     if(IsMouseButtonPressed(MOUSE_BUTTON_LEFT)){
@@ -39,7 +42,16 @@ void getClickedState(Camera2D& camera, Image& map){
 
         const char* state = std::string(colorCodes[colorStr]).c_str();
         
-        std::cout << stateData[state]["country"] << std::endl;
+        if(!statesData[state]["country"].is_null()){
+            focusedState.country = statesData[state]["country"];
+        }
+        if(!statesData[state]["economy"].is_null()){
+            focusedState.economy = statesData[state]["economy"];
+        }
+        if(!statesData[state]["population"].is_null()){
+            focusedState.population = statesData[state]["population"];
+        }
+        
         
     }   
 }
@@ -57,7 +69,7 @@ void HandleUIEvents(std::vector<UIElement> &UIElements){
 
             if(CheckCollisionRecs(cursorHitBox, UIHitbox)){
                 if(ID == 1){
-                    element.color = GREEN;
+                    // element.color = GREEN;
                 }
                 break;
             }
@@ -84,7 +96,7 @@ void HandleUIEvents(std::vector<UIElement> &UIElements){
 
 void generateUI(std::vector<UIElement> &elements){
     elements.push_back(UIElement({screenWidth - 200, screenHeight - 100}, {200, 100}, BLACK, 1));
-    elements.push_back(UIElement({0, 0}, {100, 50}, RED, 2));
+    elements.push_back(UIElement({0, screenHeight - 50}, {100, 50}, BLACK, 2));
 }
 
 int main()
@@ -105,7 +117,7 @@ int main()
     colorCodes = json::parse(colorCodesStream);
 
     std::ifstream stateDataStream("data/PL01.json");
-    stateData = json::parse(stateDataStream);
+    statesData = json::parse(stateDataStream);
 
     std::vector<UIElement> UIElements;
 
@@ -196,9 +208,17 @@ int main()
             //? UI
 
             for(UIElement element : UIElements){
-                printColor(element.color);
                 DrawRectangle(element.position.x, element.position.y, element.size.x, element.size.y, element.color);
             }
+
+            
+            const char* country = ("Owner: " + focusedState.country).c_str();
+            const char* population = ("Population: " + std::to_string(focusedState.population)).c_str();
+            const char* economy = ("Economy: " + std::to_string(focusedState.economy)).c_str();
+
+            DrawText(country, 0, screenHeight - 50, 10, WHITE);
+            DrawText(population, 0, screenHeight - 30, 10, WHITE);
+            DrawText(economy, 0, screenHeight - 10, 10, WHITE);
 
 
         EndDrawing();
