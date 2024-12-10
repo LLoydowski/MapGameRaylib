@@ -55,3 +55,10 @@ void StateData::Clear(){
     economy = 0;
     country = "";
 }
+
+bool StateData::isStateOpened(){
+    if(population != 0 && country != ""){
+        return true;
+    }
+    return false;
+}

@@ -42,6 +42,9 @@ void getClickedState(Camera2D& camera, Image& map){
 
         const char* state = std::string(colorCodes[colorStr]).c_str();
         
+        if(!statesData[state].is_null()){
+            focusedState.stateID = state;
+        }
         if(!statesData[state]["country"].is_null()){
             focusedState.country = statesData[state]["country"];
         }
@@ -56,6 +59,54 @@ void getClickedState(Camera2D& camera, Image& map){
     }   
 }
 
+void saveFocusedState(){
+    statesData[focusedState.stateID]["country"] = focusedState.country;
+    statesData[focusedState.stateID]["economy"] = focusedState.economy;
+    statesData[focusedState.stateID]["population"] = focusedState.population;
+}
+
+void showSliderUI(std::vector<UIElement> &UIElements){
+    UIElement sliderBg({0, screenHeight - 50}, {screenWidth, 100}, GRAY, "sliderBG");
+    UIElement slider({0, screenHeight - 50}, {screenWidth / 2, 100}, BLUE, "slider");
+
+    UIElements.push_back(sliderBg);
+    UIElements.push_back(slider);
+}
+
+void hideSliderUI(std::vector<UIElement> &UIElements){
+    int bgIndex = -1;
+    int sliderIndex = -1;
+
+    for(int i = 0; i < UIElements.size(); i++){
+        UIElement* element = &UIElements[i];
+
+        if(element->getID() == "sliderBG"){
+           bgIndex = i;
+        }
+        if(element->getID() == "slider"){
+            sliderIndex = i;
+        }
+    }
+    if(bgIndex != -1 && sliderIndex != -1){
+        UIElements.erase(UIElements.begin() + bgIndex);
+        UIElements.erase(UIElements.begin() + sliderIndex);
+    }
+}
+
+void HandleKeyboardEvents(std::vector<UIElement> &UIElements){
+    if(IsKeyPressed(KEY_R)){
+        if(focusedState.isStateOpened()){
+            showSliderUI(UIElements);
+        }else{
+            std::cout << "Please click on state first" << std::endl;
+        }
+    }
+    if(IsKeyPressed(KEY_C)){
+        hideSliderUI(UIElements);
+    }
+}
+
+
 void HandleUIEvents(std::vector<UIElement> &UIElements){
     Vector2 mousePos = GetMousePosition();
     Rectangle cursorHitBox = {mousePos.x, mousePos.y, 1, 1};
@@ -65,11 +116,11 @@ void HandleUIEvents(std::vector<UIElement> &UIElements){
         
         for(UIElement &element : UIElements){
             Rectangle UIHitbox = {element.position.x, element.position.y, element.size.x, element.size.y};
-            int ID = element.getID();
+            std::string ID = element.getID();
 
             if(CheckCollisionRecs(cursorHitBox, UIHitbox)){
-                if(ID == 1){
-                    // element.color = GREEN;
+                if(ID == "nextTurn"){
+                    
                 }
                 break;
             }
@@ -79,15 +130,15 @@ void HandleUIEvents(std::vector<UIElement> &UIElements){
 
     for(UIElement &element : UIElements){
             Rectangle UIHitbox = {element.position.x, element.position.y, element.size.x, element.size.y};
-            int ID = element.getID();
+            std::string ID = element.getID();
 
             if(CheckCollisionRecs(cursorHitBox, UIHitbox)){
-                if(ID == 1 && !areColorsEqual(element.color, GREEN)){
+                if(ID == "nextTurn" && !areColorsEqual(element.color, GREEN)){
                     element.color = BLUE;
                 }
                 break;
             }else{
-                if(ID == 1 && !areColorsEqual(element.color, GREEN)){
+                if(ID == "nextTurn" && !areColorsEqual(element.color, GREEN)){
                     element.color = BLACK;
                 }
             }
@@ -95,8 +146,7 @@ void HandleUIEvents(std::vector<UIElement> &UIElements){
 }
 
 void generateUI(std::vector<UIElement> &elements){
-    elements.push_back(UIElement({screenWidth - 200, screenHeight - 100}, {200, 100}, BLACK, 1));
-    elements.push_back(UIElement({0, screenHeight - 50}, {100, 50}, BLACK, 2));
+    elements.push_back(UIElement({screenWidth - 200, screenHeight - 100}, {200, 100}, BLACK, "nextTurn"));
 }
 
 int main()
@@ -187,6 +237,7 @@ int main()
 
         getClickedState(camera, map);
         HandleUIEvents(UIElements);
+        HandleKeyboardEvents(UIElements);
 
         BeginDrawing();
             ClearBackground(RAYWHITE);
@@ -216,9 +267,9 @@ int main()
             const char* population = ("Population: " + std::to_string(focusedState.population)).c_str();
             const char* economy = ("Economy: " + std::to_string(focusedState.economy)).c_str();
 
-            DrawText(country, 0, screenHeight - 50, 10, WHITE);
-            DrawText(population, 0, screenHeight - 30, 10, WHITE);
-            DrawText(economy, 0, screenHeight - 10, 10, WHITE);
+            DrawText(country, 10, 10, 16, BLACK);
+            DrawText(population, 10, 30, 16, BLACK);
+            DrawText(economy, 10, 50, 16, BLACK);
 
 
         EndDrawing();

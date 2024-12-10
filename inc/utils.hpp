@@ -12,7 +12,9 @@ bool areColorsEqual(Color color1, Color color2);
 struct StateData{
     int population;
     int economy;
+    std::string stateID;
     std::string country;
 
     void Clear();
+    bool isStateOpened();
 };
