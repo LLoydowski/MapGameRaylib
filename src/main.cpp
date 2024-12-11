@@ -55,7 +55,6 @@ void getClickedState(Camera2D& camera, Image& map){
             focusedState.population = statesData[state]["population"];
         }
         
-        
     }   
 }
 
@@ -106,14 +105,11 @@ void HandleKeyboardEvents(std::vector<UIElement> &UIElements){
     }
 }
 
-
-void HandleUIEvents(std::vector<UIElement> &UIElements){
+bool HandleUIEvents(std::vector<UIElement> &UIElements){
     Vector2 mousePos = GetMousePosition();
     Rectangle cursorHitBox = {mousePos.x, mousePos.y, 1, 1};
 
     if(IsMouseButtonPressed(MOUSE_BUTTON_LEFT)){
-        
-        
         for(UIElement &element : UIElements){
             Rectangle UIHitbox = {element.position.x, element.position.y, element.size.x, element.size.y};
             std::string ID = element.getID();
@@ -122,9 +118,10 @@ void HandleUIEvents(std::vector<UIElement> &UIElements){
                 if(ID == "nextTurn"){
                     
                 }
-                break;
+                return true;
             }
         }
+
 
     }
 
@@ -143,10 +140,25 @@ void HandleUIEvents(std::vector<UIElement> &UIElements){
                 }
             }
     }
+
+    return false;
 }
 
 void generateUI(std::vector<UIElement> &elements){
     elements.push_back(UIElement({screenWidth - 200, screenHeight - 100}, {200, 100}, BLACK, "nextTurn"));
+}
+
+void handleInputs(std::vector<UIElement> &elements, Camera2D camera, Image mapImage){
+    bool uiEventHappened = false;
+    uiEventHappened = HandleUIEvents(elements);
+
+    if(uiEventHappened){
+        return;
+    }
+    
+    getClickedState(camera, mapImage); 
+
+    HandleKeyboardEvents(elements);
 }
 
 int main()
@@ -235,9 +247,17 @@ int main()
             }
         }
 
-        getClickedState(camera, map);
-        HandleUIEvents(UIElements);
-        HandleKeyboardEvents(UIElements);
+        handleInputs(UIElements, camera, map);
+
+        // bool uiEventHappened = HandleUIEvents(UIElements);
+
+        // if(uiEventHappened){
+        //     continue;
+        // }
+        
+        // getClickedState(camera, map); 
+    
+        // HandleKeyboardEvents(UIElements);
 
         BeginDrawing();
             ClearBackground(RAYWHITE);
