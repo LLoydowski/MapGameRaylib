@@ -4,8 +4,8 @@
 #include <raylib/raymath.h>
 #include <iostream>
 #include <fstream>
-#include <string>
 #include <vector>
+#include <string>
 
 #include "utils.hpp"
 #include "UIElement.hpp"
@@ -20,6 +20,44 @@ json colorCodes;
 json statesData;
 
 StateData focusedState;
+
+Color getScreenColor(int x, int y){
+    Image screen = LoadImageFromScreen();
+
+    Color color = GetImageColor(screen, x, y);
+
+    UnloadImage(screen);
+
+    return color;
+}
+
+void renderCountries(){
+
+    Image screenImage = LoadImageFromScreen();
+    Color *pixels = LoadImageColors(screenImage);
+
+    auto colors = colorCodes.items();
+    
+    // for(auto element : colors){
+    //     int colorHex = stoi(std::string(element.key()));
+    //     Color color = GetColor(colorHex);
+
+        for (int y = 0; y < screenHeight; y++) { 
+            for (int x = 0; x < screenWidth; x++) { 
+                int pixelIndex = y * screenWidth + x; 
+                if (areColorsEqual(pixels[pixelIndex], GetColor(0x00394b))) { 
+                    // Found a matching pixel (do something with this information)
+                    DrawRectangle(x, y, 1, 1, GREEN);
+                    DrawCircle(x, y, 2, GREEN); // Highlight it on the screen
+                } 
+            } 
+        }
+    // }
+
+
+    UnloadImage(screenImage);
+
+}
 
 void getClickedState(Camera2D& camera, Image& map){
     if(IsMouseButtonPressed(MOUSE_BUTTON_LEFT)){
@@ -144,6 +182,14 @@ bool HandleUIEvents(std::vector<UIElement> &UIElements){
     return false;
 }
 
+constexpr unsigned int hash(const char* str) {
+    unsigned int hash = 0;
+    while (*str) {
+        hash = (hash * 31) + static_cast<unsigned int>(*str++);
+    }
+    return hash;
+}
+
 void generateUI(std::vector<UIElement> &elements){
     elements.push_back(UIElement({screenWidth - 200, screenHeight - 100}, {200, 100}, BLACK, "nextTurn"));
 }
@@ -186,7 +232,6 @@ int main()
     generateUI(UIElements);
 
     
-
     while (!WindowShouldClose()) 
     {
         if (IsKeyPressed(KEY_ONE)) zoomMode = 0;
@@ -271,10 +316,69 @@ int main()
             rlPopMatrix();
 
             DrawTexture(mapTexture, screenWidth / 4, screenHeight / 4, WHITE);
-            DrawRectangle(0, 0, 400, 400, GetColor(0xFF0055));
+            // DrawRectangle(0, 0, 400, 400, GetColor(0xFF0055));
 
-
+            
             EndMode2D();
+
+            Image screenImage = LoadImageFromScreen();
+            Color *pixels = LoadImageColors(screenImage);
+
+
+            auto colors = colorCodes.items();
+
+            std::cout << "--------------" <<  std::endl;
+            
+            for(auto element : colors){
+                std::string colorStr = std::string(element.key());
+                std::string colorStrAlpha = colorStr + "FF";
+
+                std::cout << colorStr << "\n" << colorStrAlpha << std::endl;
+
+                Color color;
+
+                try {
+                    unsigned int colorHex = std::stoul(colorStrAlpha, nullptr, 16); // Correct hex conversion
+                    color = GetColor(colorHex); // Use the same `color` variable
+                } catch (const std::exception &e) {
+                    std::cerr << "Failed to parse colorStr as hex: " << colorStrAlpha << " (" << e.what() << ")" << std::endl;
+                    continue;
+                }
+
+                printColor(color);
+
+
+                std::string stateName = colorCodes[colorStr];
+
+                if(statesData[stateName]["country"].is_null()){
+                    continue;
+                }
+                std::string country(statesData[stateName]["country"]);
+
+
+                for (int y = 0; y < screenHeight; y++) { 
+                    for (int x = 0; x < screenWidth; x++) { 
+                        int pixelIndex = y * screenWidth + x; 
+                        if (areColorsEqual(pixels[pixelIndex], color)) { 
+                            // Found a matching pixel (do something with this information)
+                            switch(hash(country.c_str())){
+                                case hash("POL"):
+                                    DrawRectangle(x, y, 1, 1, RED);
+                                    break;
+                                case hash("SKIBADI"):
+                                    DrawRectangle(x, y, 1, 1, BLUE);
+                                    break;
+                                default:
+                                    DrawRectangle(x, y, 1, 1, GREEN);
+                                    break;
+                            }
+                        } 
+                    } 
+                }
+            }
+
+
+            UnloadImage(screenImage);
 
             //? UI
 

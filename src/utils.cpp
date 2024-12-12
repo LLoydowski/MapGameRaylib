@@ -6,8 +6,12 @@
 
 #include "utils.hpp"
 
-void printColor(Color color){
-    std::cout << "R: " << int(color.r) << " G: " << int(color.g) << " B: " << int(color.b) << " A: " << int(color.a) << std::endl;
+void printColor(Color &color){
+    std::cout
+            << "R: " << (int)color.r << " "
+            << "G: " << (int)color.g << " "
+            << "B: " << (int)color.b << " "
+            << "A: " << (int)color.a << std::endl;
 }
 
 std::string ColorToHexString(Color color) {

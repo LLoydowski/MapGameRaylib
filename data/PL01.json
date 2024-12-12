@@ -5,8 +5,78 @@
         "economy": 5000
     },
     "POMR": {
-        "country": "POL",
+        "country": "SKIBADI",
         "population": 2456,
         "economy": 3260
+    },
+    "WRMA": {
+        "country": "SKIBADI",
+        "population": 3754,
+        "economy": 4120
+    },
+    "PODL": {
+        "country": "SKIBADI",
+        "population": 2121,
+        "economy": 3150
+    },
+    "MAZO": {
+        "country": "POL",
+        "population": 5293,
+        "economy": 5500
+    },
+    "KUPR": {
+        "country": "POL",
+        "population": 1820,
+        "economy": 2850
+    },
+    "WPOL": {
+        "country": "POL",
+        "population": 3412,
+        "economy": 4000
+    },
+    "LUBU": {
+        "country": "POL",
+        "population": 2945,
+        "economy": 3200
+    },
+    "LODZ": {
+        "country": "POL",
+        "population": 2100,
+        "economy": 3100
+    },
+    "SWIE": {
+        "country": "POL",
+        "population": 1785,
+        "economy": 2700
+    },
+    "DSLA": {
+        "country": "POL",
+        "population": 1500,
+        "economy": 2500
+    },
+    "OPOL": {
+        "country": "POL",
+        "population": 2300,
+        "economy": 3000
+    },
+    "SLAS": {
+        "country": "POL",
+        "population": 4100,
+        "economy": 4500
+    },
+    "MPOL": {
+        "country": "POL",
+        "population": 3700,
+        "economy": 4200
+    },
+    "PKAR": {
+        "country": "POL",
+        "population": 1950,
+        "economy": 2900
+    },
+    "LUBE": {
+        "country": "SKIBADI",
+        "population": 2500,
+        "economy": 3300
     }
 }
