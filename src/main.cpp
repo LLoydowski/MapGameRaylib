@@ -12,15 +12,6 @@
 
 using json = nlohmann::json;
 
-
-const int screenWidth = 800;
-const int screenHeight = 450;
-
-json colorCodes;
-json statesData;
-
-StateData focusedState;
-
 Color getScreenColor(int x, int y){
     Image screen = LoadImageFromScreen();
 
@@ -31,7 +22,7 @@ Color getScreenColor(int x, int y){
     return color;
 }
 
-void renderCountries(){
+void renderCountries(json &colorCodes, Vector2 &screenSize){
 
     Image screenImage = LoadImageFromScreen();
     Color *pixels = LoadImageColors(screenImage);
@@ -42,9 +33,9 @@ void renderCountries(){
     //     int colorHex = stoi(std::string(element.key()));
     //     Color color = GetColor(colorHex);
 
-        for (int y = 0; y < screenHeight; y++) { 
-            for (int x = 0; x < screenWidth; x++) { 
-                int pixelIndex = y * screenWidth + x; 
+        for (int y = 0; y < screenSize.y; y++) { 
+            for (int x = 0; x < screenSize.x; x++) { 
+                int pixelIndex = y * screenSize.x + x; 
                 if (areColorsEqual(pixels[pixelIndex], GetColor(0x00394b))) { 
                     // Found a matching pixel (do something with this information)
                     DrawRectangle(x, y, 1, 1, GREEN);
@@ -59,12 +50,12 @@ void renderCountries(){
 
 }
 
-void getClickedState(Camera2D& camera, Image& map){
+void getClickedState(Camera2D& camera, Image& map, StateData &focusedState, json &statesData, json &colorCodes, Vector2 &screenSize){
     if(IsMouseButtonPressed(MOUSE_BUTTON_LEFT)){
         Vector2 mousePos = GetMousePosition(); //? Gets mouse position
         Vector2 worldPos = GetScreenToWorld2D(mousePos, camera); //? Converts screen position to world position
 
-        Vector2 textureSize = {screenWidth / 4, screenHeight / 4};
+        Vector2 textureSize = {screenSize.x / 4, screenSize.y / 4};
 
         if(!isInTextureBounds(worldPos, textureSize, map)){
             return;
@@ -95,15 +86,15 @@ void getClickedState(Camera2D& camera, Image& map){
     }   
 }
 
-void saveFocusedState(){
+void saveFocusedState(json &statesData, StateData &focusedState){
     statesData[focusedState.stateID]["country"] = focusedState.country;
     statesData[focusedState.stateID]["economy"] = focusedState.economy;
     statesData[focusedState.stateID]["population"] = focusedState.population;
 }
 
-void showSliderUI(std::vector<UIElement> &UIElements){
-    UIElement sliderBg({0, screenHeight - 50}, {screenWidth, 100}, GRAY, "sliderBG");
-    UIElement slider({0, screenHeight - 50}, {screenWidth / 2, 100}, BLUE, "slider");
+void showSliderUI(std::vector<UIElement> &UIElements, Vector2 &screenSize){
+    UIElement sliderBg({0, screenSize.y - 50}, {screenSize.x, 100}, GRAY, "sliderBG");
+    UIElement slider({0, screenSize.y - 50}, {screenSize.x / 2, 100}, BLUE, "slider");
 
     UIElements.push_back(sliderBg);
     UIElements.push_back(slider);
@@ -129,10 +120,10 @@ void hideSliderUI(std::vector<UIElement> &UIElements){
     }
 }
 
-void HandleKeyboardEvents(std::vector<UIElement> &UIElements){
+void HandleKeyboardEvents(std::vector<UIElement> &UIElements, StateData &focusedState, Vector2 &screenSize){
     if(IsKeyPressed(KEY_R)){
         if(focusedState.isStateOpened()){
-            showSliderUI(UIElements);
+            showSliderUI(UIElements, screenSize);
         }else{
             std::cout << "Please click on state first" << std::endl;
         }
@@ -189,11 +180,11 @@ constexpr unsigned int hash(const char* str) {
     return hash;
 }
 
-void generateUI(std::vector<UIElement> &elements){
-    elements.push_back(UIElement({screenWidth - 200, screenHeight - 100}, {200, 100}, BLACK, "nextTurn"));
+void generateUI(std::vector<UIElement> &elements, Vector2 &screenSize){
+    elements.push_back(UIElement({screenSize.x - 200, screenSize.y - 100}, {200, 100}, BLACK, "nextTurn"));
 }
 
-void handleInputs(std::vector<UIElement> &elements, Camera2D camera, Image mapImage){
+void handleInputs(std::vector<UIElement> &elements, Camera2D &camera, Image &mapImage, StateData &focusedState, json &statesData, json &colorCodes, Vector2 &screenSize){
     bool uiEventHappened = false;
     uiEventHappened = HandleUIEvents(elements);
 
@@ -201,13 +192,17 @@ void handleInputs(std::vector<UIElement> &elements, Camera2D camera, Image mapIm
         return;
     }
     
-    getClickedState(camera, mapImage); 
+    getClickedState(camera, mapImage, focusedState, statesData, colorCodes, screenSize); 
 
-    HandleKeyboardEvents(elements);
+    HandleKeyboardEvents(elements, focusedState, screenSize);
 }
 
 int main()
 {
+    const int screenWidth = 800;
+    const int screenHeight = 450;
+    Vector2 screenSize = {screenWidth, screenHeight};
+
     InitWindow(screenWidth, screenHeight, "Super Giga Map Game");
 
     SetTargetFPS(60);
@@ -220,6 +215,12 @@ int main()
 
     int zoomMode = 0;
 
+
+    json colorCodes;
+    json statesData;
+
+    StateData focusedState;
+
     std::ifstream colorCodesStream("gfx/maps/PL01.json");
     colorCodes = json::parse(colorCodesStream);
 
@@ -228,7 +229,7 @@ int main()
 
     std::vector<UIElement> UIElements;
 
-    generateUI(UIElements);
+    generateUI(UIElements, screenSize);
 
     
     while (!WindowShouldClose()) 
@@ -291,7 +292,7 @@ int main()
             }
         }
 
-        handleInputs(UIElements, camera, map);
+        handleInputs(UIElements, camera, map, focusedState, statesData, colorCodes, screenSize);
 
         // bool uiEventHappened = HandleUIEvents(UIElements);
 
