@@ -73,8 +73,7 @@ void getClickedState(Camera2D& camera, Image& map){
         Color color = GetImageColor(map, worldPos.x - textureSize.x , worldPos.y - textureSize.y); //? Gets color of the pressed pixel
         std::string colorStr = ColorToHexString(color);
 
-        std::cout << colorStr << std::endl; 
-        if(colorStr == "000000"){
+        if(colorStr == "000000" || colorStr == "191919" || colorStr == "ffffff"){
             return;
         }
 
@@ -213,7 +212,7 @@ int main()
 
     SetTargetFPS(60);
 
-    Image map = LoadImage("gfx/maps/PL01.png");
+    Image map = LoadImage("gfx/maps/PL01OUTLINED.png");
     Texture2D mapTexture = LoadTextureFromImage(map);
 
     Camera2D camera = { 0 };
@@ -326,15 +325,10 @@ int main()
 
 
             auto colors = colorCodes.items();
-
-            std::cout << "--------------" <<  std::endl;
             
             for(auto element : colors){
                 std::string colorStr = std::string(element.key());
                 std::string colorStrAlpha = colorStr + "FF";
-
-                std::cout << colorStr << "\n" << colorStrAlpha << std::endl;
-
                 Color color;
 
                 try {
@@ -344,9 +338,6 @@ int main()
                     std::cerr << "Failed to parse colorStr as hex: " << colorStrAlpha << " (" << e.what() << ")" << std::endl;
                     continue;
                 }
-
-                printColor(color);
-
 
                 std::string stateName = colorCodes[colorStr];
 
