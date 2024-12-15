@@ -135,38 +135,28 @@ void HandleKeyboardEvents(std::vector<UIElement> &UIElements, StateData &focused
 
 bool HandleUIEvents(std::vector<UIElement> &UIElements){
     Vector2 mousePos = GetMousePosition();
-    Rectangle cursorHitBox = {mousePos.x, mousePos.y, 1, 1};
-
-    if(IsMouseButtonPressed(MOUSE_BUTTON_LEFT)){
-        for(UIElement &element : UIElements){
-            Rectangle UIHitbox = {element.position.x, element.position.y, element.size.x, element.size.y};
-            std::string ID = element.getID();
-
-            if(CheckCollisionRecs(cursorHitBox, UIHitbox)){
-                if(ID == "nextTurn"){
-                    
-                }
-                return true;
-            }
-        }
-
-
-    }
 
     for(UIElement &element : UIElements){
-            Rectangle UIHitbox = {element.position.x, element.position.y, element.size.x, element.size.y};
-            std::string ID = element.getID();
+        Rectangle UIHitbox = {element.position.x, element.position.y, element.size.x, element.size.y};
+        std::string ID = element.getID();
 
-            if(CheckCollisionRecs(cursorHitBox, UIHitbox)){
-                if(ID == "nextTurn" && !areColorsEqual(element.color, GREEN)){
-                    element.color = BLUE;
-                }
-                break;
-            }else{
-                if(ID == "nextTurn" && !areColorsEqual(element.color, GREEN)){
-                    element.color = BLACK;
+        if(CheckCollisionPointRec(mousePos, UIHitbox)){
+            if(IsMouseButtonPressed(MOUSE_BUTTON_LEFT)){
+                if(ID == "declareWar"){
+                    declareWar();
                 }
             }
+
+            if(ID == "nextTurn" && !areColorsEqual(element.color, GREEN)){
+                element.color = BLUE;
+            }
+        
+            return true;
+        }else{
+            if(ID == "nextTurn" && !areColorsEqual(element.color, GREEN)){
+                element.color = BLACK;
+            }
+        }
     }
 
     return false;
@@ -181,7 +171,7 @@ constexpr unsigned int hash(const char* str) {
 }
 
 void generateUI(std::vector<UIElement> &elements, Vector2 &screenSize){
-    elements.push_back(UIElement({screenSize.x - 200, screenSize.y - 100}, {200, 100}, BLACK, "nextTurn"));
+    elements.push_back(UIElement({screenSize.x - 200, screenSize.y - 100}, {200, 100}, BLACK, "declareWar"));
 }
 
 void handleInputs(std::vector<UIElement> &elements, Camera2D &camera, Image &mapImage, StateData &focusedState, json &statesData, json &colorCodes, Vector2 &screenSize){

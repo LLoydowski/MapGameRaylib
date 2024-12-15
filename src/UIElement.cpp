@@ -1,5 +1,8 @@
-#include "UIElement.hpp"
 #include <string>
+#include <iostream>
+
+#include "UIElement.hpp"
+
 
 UIElement::UIElement(Vector2 pos, Vector2 size, Color color, std::string ID){
     this->position = pos;
@@ -10,4 +13,8 @@ UIElement::UIElement(Vector2 pos, Vector2 size, Color color, std::string ID){
 
 std::string UIElement::getID(){
     return ID;
+}
+
+void declareWar(){
+    std::cout << "SKIBADI WAR DECALRED" << std::endl;
 }
