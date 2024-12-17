@@ -93,8 +93,8 @@ void saveFocusedState(json &statesData, StateData &focusedState){
 }
 
 void showSliderUI(std::vector<UIElement> &UIElements, Vector2 &screenSize){
-    UIElement sliderBg({0, screenSize.y - 50}, {screenSize.x, 100}, GRAY, "sliderBG");
-    UIElement slider({0, screenSize.y - 50}, {screenSize.x / 2, 100}, BLUE, "slider");
+    UIElement sliderBg({0, screenSize.y - 50}, {screenSize.x, 100}, GRAY, "sliderBG", 0);
+    UIElement slider({0, screenSize.y - 50}, {screenSize.x / 2, 100}, BLUE, "slider", 0);
 
     UIElements.push_back(sliderBg);
     UIElements.push_back(slider);
@@ -133,12 +133,48 @@ void HandleKeyboardEvents(std::vector<UIElement> &UIElements, StateData &focused
     }
 }
 
-bool HandleUIEvents(std::vector<UIElement> &UIElements){
+bool HandleUIEvents(std::vector<UIElement> &UIElements, Vector2 screenSize){
     Vector2 mousePos = GetMousePosition();
 
     for(UIElement &element : UIElements){
-        Rectangle UIHitbox = {element.position.x, element.position.y, element.size.x, element.size.y};
+        Rectangle UIHitbox;
         std::string ID = element.getID();
+
+        switch (element.anchor)
+        {
+            case 1:
+                UIHitbox = Rectangle({
+                    element.position.x * screenSize.x,
+                    element.position.y * screenSize.y,
+                    element.size.x,
+                    element.size.y}
+                );
+                break;
+            case 2:
+                UIHitbox = Rectangle({
+                    (element.position.x * screenSize.x) - element.size.x,
+                    element.position.y * screenSize.y,
+                    element.size.x,
+                    element.size.y}
+                );
+                break;
+            case 3:
+                UIHitbox = Rectangle({
+                    element.position.x * screenSize.x,
+                    (element.position.y * screenSize.y) - element.size.y,
+                    element.size.x,
+                    element.size.y}
+                );
+                break;
+            case 4:
+                UIHitbox = Rectangle({
+                    (element.position.x * screenSize.x) - element.size.x,
+                    (element.position.y * screenSize.y) - element.size.y,
+                    element.size.x,
+                    element.size.y}
+                );
+                break;
+        }
 
         if(CheckCollisionPointRec(mousePos, UIHitbox)){
             if(IsMouseButtonPressed(MOUSE_BUTTON_LEFT)){
@@ -171,12 +207,22 @@ constexpr unsigned int hash(const char* str) {
 }
 
 void generateUI(std::vector<UIElement> &elements, Vector2 &screenSize){
-    elements.push_back(UIElement({screenSize.x - 200, screenSize.y - 100}, {200, 100}, BLACK, "declareWar"));
+    //? LEFT TOP
+    // elements.push_back(UIElement({0, 0}, {100, 100}, BLUE, "test", 1));
+    //? RIGHT TOP
+    // elements.push_back(UIElement({1, 0}, {100, 100}, RED, "test", 2));
+    //? LEFT BOT
+    // elements.push_back(UIElement({0, 1}, {100, 100}, YELLOW, "test", 3));
+    //? RIGHT BOT
+    // elements.push_back(UIElement({1, 1}, {100, 100}, BLACK, "test", 4));
+
+    elements.push_back(UIElement({1, 1}, {100, 100}, BLACK, "declareWar", 4));
+    elements.push_back(UIElement({0, screenSize.y - 125}, {350, 250}, GetColor(0x050505AA), "infoPanel", 4));
 }
 
 void handleInputs(std::vector<UIElement> &elements, Camera2D &camera, Image &mapImage, StateData &focusedState, json &statesData, json &colorCodes, Vector2 &screenSize){
     bool uiEventHappened = false;
-    uiEventHappened = HandleUIEvents(elements);
+    uiEventHappened = HandleUIEvents(elements, screenSize);
 
     if(uiEventHappened){
         return;
@@ -189,8 +235,15 @@ void handleInputs(std::vector<UIElement> &elements, Camera2D &camera, Image &map
 
 int main()
 {
-    const int screenWidth = 800;
-    const int screenHeight = 450;
+    int screenWidth = 1400;
+    int screenHeight = 800;
+
+    SetConfigFlags(FLAG_WINDOW_RESIZABLE); 
+
+    // int monitor = GetCurrentMonitor();
+    // SetWindowSize(GetMonitorWidth(monitor), GetMonitorHeight(monitor));
+    // ToggleFullscreen();
+
     Vector2 screenSize = {screenWidth, screenHeight};
 
     InitWindow(screenWidth, screenHeight, "Super Giga Map Game");
@@ -224,6 +277,11 @@ int main()
     
     while (!WindowShouldClose()) 
     {
+
+        screenWidth = GetScreenWidth();
+        screenHeight = GetScreenHeight();
+        screenSize = {float(screenWidth), float(screenHeight)};
+
         if (IsKeyPressed(KEY_ONE)) zoomMode = 0;
         else if (IsKeyPressed(KEY_TWO)) zoomMode = 1;
         
@@ -365,7 +423,7 @@ int main()
             //? UI
 
             for(UIElement element : UIElements){
-                DrawRectangle(element.position.x, element.position.y, element.size.x, element.size.y, element.color);
+                element.drawElement(screenSize);
             }
 
             
